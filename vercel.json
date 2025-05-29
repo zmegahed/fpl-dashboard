@@ -22,6 +22,11 @@
       "dest": "/index.html"
     }
   ],
+  "functions": {
+    "api/app.py": {
+      "maxDuration": 60
+    }
+  },
   "env": {
     "PYTHONPATH": "./api"
   }

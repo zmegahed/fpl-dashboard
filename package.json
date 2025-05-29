@@ -1,7 +1,7 @@
 {
-  "name": "fpl-analysis-dashboard",
-  "version": "1.0.0",
-  "description": "Fantasy Premier League Analysis Dashboard with Python Backend",
+  "name": "fpl-3year-analysis-dashboard",
+  "version": "2.0.0",
+  "description": "Fantasy Premier League 3-Year Analysis Dashboard - Real Data Only",
   "private": true,
   "type": "module",
   "scripts": {
