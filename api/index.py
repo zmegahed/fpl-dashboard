@@ -11,15 +11,28 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
         
         response = {
-            'status': 'FPL Analysis API is running',
-            'version': '1.0.0',
-            'endpoints': [
-                '/api/ - API status',
-                '/api/players - Get all players data',
-                '/api/stats - Get summary statistics'
+            'status': 'FPL 3-Year Analysis API is running',
+            'version': '3.0.0',
+            'features': [
+                'Real 3-year historical data analysis',
+                'Optimal squad builder with historical performance',
+                'Player search with season-by-season stats',
+                'Comprehensive consistency and reliability metrics'
             ],
-            'message': 'Python backend is working successfully!',
-            'dataSource': 'Fantasy Premier League Official API'
+            'endpoints': [
+                '/api/ - API status and information',
+                '/api/players - 3-year player analysis and squad building',
+                '/api/players?optimal-squad&budget=100&formation=3-5-2 - Optimal squad generation',
+                '/api/players?player-search&q=player_name - Player history search',
+                '/api/stats - Summary statistics'
+            ],
+            'data_sources': [
+                'Fantasy Premier League Official API (current season)',
+                'vaastav/Fantasy-Premier-League GitHub Repository (historical data)',
+                'Real data from 2022-23, 2023-24, and 2024-25 seasons'
+            ],
+            'message': 'Complete FPL analysis system with real historical data!',
+            'last_updated': '2024-12-19T12:00:00Z'
         }
         
         self.wfile.write(json.dumps(response).encode())
