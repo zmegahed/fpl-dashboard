@@ -1,149 +1,92 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-         BarChart, Bar, PieChart, Pie, Cell, Legend } from 'recharts';
-import { TrendingUp, DollarSign, Users, Award, Target, Star, 
-         Filter, Search, RefreshCw, AlertCircle, CheckCircle, Clock, Zap } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+         BarChart, Bar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, 
+         ScatterChart, Scatter, PieChart, Pie, Cell, Legend } from 'recharts';
+import { TrendingUp, DollarSign, Users, Award, Target, Star, Shield, Activity,
+         Filter, Search, RefreshCw, AlertCircle, CheckCircle, Clock, Zap, 
+         Trophy, BarChart3, PieChart as PieChartIcon, Settings, Download } from 'lucide-react';
 
-const FPLDashboard = () => {
-  const [players, setPlayers] = useState([]);
-  const [stats, setStats] = useState({});
+const Enhanced3YearFPLDashboard = () => {
+  const [currentData, setCurrentData] = useState([]);
+  const [threeYearData, setThreeYearData] = useState([]);
+  const [optimalSquad, setOptimalSquad] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview');
+  
+  // Filters
   const [selectedPosition, setSelectedPosition] = useState('All');
   const [maxPrice, setMaxPrice] = useState(15);
-  const [minPoints, setMinPoints] = useState(0);
+  const [minConsistency, setMinConsistency] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
-  const [lastUpdated, setLastUpdated] = useState(null);
+  
+  // Squad builder settings
+  const [budget, setBudget] = useState(100);
+  const [formation, setFormation] = useState('3-5-2');
+  const [prioritizeConsistency, setPrioritizeConsistency] = useState(true);
 
-  // Fetch FPL data from API endpoints
-  const fetchFPLData = async () => {
+  // Fetch all data
+  const fetchAllData = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      console.log('Fetching FPL data from API...');
+      // Fetch current season data
+      const currentResponse = await fetch('/api/players');
+      const currentData = await currentResponse.json();
       
-      // Fetch players data
-      const playersResponse = await fetch('/api/players');
-      if (!playersResponse.ok) {
-        throw new Error(`Players API error! status: ${playersResponse.status}`);
-      }
+      // Fetch 3-year analysis
+      const threeYearResponse = await fetch('/api/3year-analysis');
+      const threeYearData = await threeYearResponse.json();
       
-      const playersData = await playersResponse.json();
-      console.log(`Fetched ${playersData.players?.length || 0} players from API`);
+      // Fetch optimal squad
+      const squadResponse = await fetch(`/api/optimal-squad?budget=${budget}&formation=${formation}`);
+      const squadData = await squadResponse.json();
       
-      // Fetch summary stats
-      const statsResponse = await fetch('/api/stats');
-      if (!statsResponse.ok) {
-        throw new Error(`Stats API error! status: ${statsResponse.status}`);
-      }
-      
-      const statsData = await statsResponse.json();
-      
-      setPlayers(playersData.players || []);
-      setStats(statsData);
-      setLastUpdated(playersData.lastUpdated || new Date().toISOString());
+      setCurrentData(currentData.players || []);
+      setThreeYearData(threeYearData.players || []);
+      setOptimalSquad(squadData);
       
     } catch (err) {
-      console.error('Error fetching FPL data:', err);
-      setError(`Failed to fetch FPL data: ${err.message}`);
+      setError(`Failed to fetch data: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch data on component mount
   useEffect(() => {
-    fetchFPLData();
-  }, []);
+    fetchAllData();
+  }, [budget, formation]);
 
   // Filter players based on current filters
   const filteredPlayers = useMemo(() => {
-    return players.filter(player => {
+    return threeYearData.filter(player => {
       const matchesPosition = selectedPosition === 'All' || player.position === selectedPosition;
       const matchesPrice = player.price <= maxPrice;
-      const matchesPoints = player.totalPoints >= minPoints;
+      const matchesConsistency = player.three_year_metrics?.consistency_score >= minConsistency;
       const matchesSearch = searchTerm === '' || 
         player.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        player.team.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (player.fullName && player.fullName.toLowerCase().includes(searchTerm.toLowerCase()));
+        player.team.toLowerCase().includes(searchTerm.toLowerCase());
       
-      return matchesPosition && matchesPrice && matchesPoints && matchesSearch;
+      return matchesPosition && matchesPrice && matchesConsistency && matchesSearch;
     });
-  }, [players, selectedPosition, maxPrice, minPoints, searchTerm]);
+  }, [threeYearData, selectedPosition, maxPrice, minConsistency, searchTerm]);
 
-  // Calculate insights from filtered data
+  // Calculate insights
   const insights = useMemo(() => {
-    if (filteredPlayers.length === 0) return stats;
+    if (filteredPlayers.length === 0) return {};
     
-    const totalPlayers = filteredPlayers.length;
-    const avgPoints = filteredPlayers.reduce((sum, p) => sum + (p.totalPoints || 0), 0) / totalPlayers;
-    const avgPrice = filteredPlayers.reduce((sum, p) => sum + (p.price || 0), 0) / totalPlayers;
-    const topScorer = filteredPlayers.reduce((max, p) => (p.totalPoints || 0) > (max.totalPoints || 0) ? p : max, filteredPlayers[0] || {});
-    const bestValue = filteredPlayers.reduce((max, p) => (p.pointsPerMillion || 0) > (max.pointsPerMillion || 0) ? p : max, filteredPlayers[0] || {});
+    const avgConsistency = filteredPlayers.reduce((sum, p) => sum + (p.three_year_metrics?.consistency_score || 0), 0) / filteredPlayers.length;
+    const reliableStarters = filteredPlayers.filter(p => p.three_year_metrics?.reliable_starter).length;
+    const lowInjuryRisk = filteredPlayers.filter(p => (p.three_year_metrics?.injury_risk || 0) < 2).length;
     
     return {
-      totalPlayers,
-      avgPoints: avgPoints.toFixed(1),
-      avgPrice: avgPrice.toFixed(1),
-      topScorer: { 
-        name: topScorer.name || 'N/A', 
-        points: topScorer.totalPoints || 0,
-        totalPoints: topScorer.totalPoints || 0
-      },
-      bestValue: { 
-        name: bestValue.name || 'N/A', 
-        pointsPerMillion: (bestValue.pointsPerMillion || 0).toFixed(1) 
-      }
+      avgConsistency: avgConsistency.toFixed(1),
+      reliableStarters,
+      lowInjuryRisk,
+      totalAnalyzed: filteredPlayers.length
     };
-  }, [filteredPlayers, stats]);
-
-  // Prepare chart data
-  const priceVsPointsData = filteredPlayers.slice(0, 100).map(player => ({
-    name: player.name,
-    price: player.price || 0,
-    points: player.totalPoints || 0,
-    position: player.position,
-    team: player.team,
-    pointsPerMillion: player.pointsPerMillion || 0
-  }));
-
-  const topPlayersByPoints = filteredPlayers
-    .sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0))
-    .slice(0, 15)
-    .map(player => ({
-      name: player.name && player.name.length > 12 ? player.name.substring(0, 12) + '...' : player.name || 'Unknown',
-      points: player.totalPoints || 0,
-      team: player.team,
-      position: player.position
-    }));
-
-  const valuePlayersData = filteredPlayers
-    .sort((a, b) => (b.pointsPerMillion || 0) - (a.pointsPerMillion || 0))
-    .slice(0, 15)
-    .map(player => ({
-      name: player.name && player.name.length > 12 ? player.name.substring(0, 12) + '...' : player.name || 'Unknown',
-      pointsPerMillion: parseFloat((player.pointsPerMillion || 0).toFixed(1)),
-      price: player.price || 0,
-      points: player.totalPoints || 0
-    }));
-
-  // Position breakdown
-  const positionCounts = filteredPlayers.reduce((acc, player) => {
-    const position = player.position || 'Unknown';
-    acc[position] = (acc[position] || 0) + 1;
-    return acc;
-  }, {});
-
-  const positionData = Object.entries(positionCounts).map(([position, count]) => ({
-    position,
-    count,
-    avgPoints: Math.round(filteredPlayers
-      .filter(p => p.position === position)
-      .reduce((sum, p) => sum + (p.totalPoints || 0), 0) / count)
-  }));
-
-  const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff88', '#ff0080'];
+  }, [filteredPlayers]);
 
   if (loading) {
     return (
@@ -151,13 +94,8 @@ const FPLDashboard = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-20">
             <RefreshCw className="w-16 h-16 mx-auto mb-4 animate-spin text-green-600" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Loading FPL Data</h2>
-            <p className="text-gray-600 mb-2">
-              Fetching real Fantasy Premier League data from API...
-            </p>
-            <p className="text-sm text-gray-500">
-              This may take a moment as we process live player data.
-            </p>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Analyzing 3 Years of FPL Data</h2>
+            <p className="text-gray-600">Processing player histories and generating optimal squad recommendations...</p>
           </div>
         </div>
       </div>
@@ -170,16 +108,14 @@ const FPLDashboard = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-20">
             <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-600" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Failed to Load Data</h2>
-            <p className="text-gray-600 mb-4 max-w-2xl mx-auto">{error}</p>
-            <div className="space-x-4">
-              <button
-                onClick={fetchFPLData}
-                className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Try Again
-              </button>
-            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Analysis Failed</h2>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button
+              onClick={fetchAllData}
+              className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Try Again
+            </button>
           </div>
         </div>
       </div>
@@ -194,293 +130,575 @@ const FPLDashboard = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-4xl font-bold text-gray-800 mb-2">
-                ⚽ FPL Analysis Dashboard
+                ⚽ FPL 3-Year Analysis & Squad Builder
               </h1>
               <p className="text-gray-600">
-                Fantasy Premier League analysis with real-time data
+                Comprehensive 3-year player analysis to build your optimal Fantasy Premier League squad
               </p>
               <div className="flex items-center gap-4 mt-2">
                 <div className="flex items-center text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                  <Zap className="w-4 h-4 mr-1" />
-                  Real Data Only
+                  <BarChart3 className="w-4 h-4 mr-1" />
+                  3-Year Analysis
+                </div>
+                <div className="flex items-center text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                  <Trophy className="w-4 h-4 mr-1" />
+                  Squad Optimization
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              {lastUpdated && (
-                <div className="flex items-center text-sm text-gray-500">
-                  <CheckCircle className="w-4 h-4 mr-1 text-green-500" />
-                  Updated: {new Date(lastUpdated).toLocaleString()}
-                </div>
-              )}
+            <button
+              onClick={fetchAllData}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Refresh Analysis
+            </button>
+          </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="mb-8">
+          <div className="flex space-x-1 bg-white p-1 rounded-lg shadow-lg">
+            {[
+              { id: 'overview', name: 'Overview', icon: BarChart3 },
+              { id: 'analysis', name: '3-Year Analysis', icon: TrendingUp },
+              { id: 'squad-builder', name: 'Squad Builder', icon: Trophy },
+              { id: 'player-compare', name: 'Player Comparison', icon: Users }
+            ].map(tab => (
               <button
-                onClick={fetchFPLData}
-                disabled={loading}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                  activeTab === tab.id 
+                    ? 'bg-green-600 text-white' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
               >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
+                <tab.icon className="w-4 h-4" />
+                {tab.name}
               </button>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm">Active Players</p>
-                <p className="text-3xl font-bold text-gray-800">{insights.totalPlayers || 0}</p>
+        {/* Overview Tab */}
+        {activeTab === 'overview' && (
+          <div className="space-y-8">
+            {/* Key Insights Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-500 text-sm">Players Analyzed</p>
+                    <p className="text-3xl font-bold text-gray-800">{insights.totalAnalyzed || 0}</p>
+                  </div>
+                  <Users className="w-8 h-8 text-blue-500" />
+                </div>
               </div>
-              <Users className="w-8 h-8 text-blue-500" />
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-xl shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm">Average Points</p>
-                <p className="text-3xl font-bold text-gray-800">{insights.avgPoints || '0'}</p>
+              
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-500 text-sm">Avg Consistency</p>
+                    <p className="text-3xl font-bold text-gray-800">{insights.avgConsistency || '0'}%</p>
+                  </div>
+                  <Activity className="w-8 h-8 text-green-500" />
+                </div>
               </div>
-              <TrendingUp className="w-8 h-8 text-green-500" />
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-xl shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm">Average Price</p>
-                <p className="text-3xl font-bold text-gray-800">£{insights.avgPrice || '0'}m</p>
+              
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-500 text-sm">Reliable Starters</p>
+                    <p className="text-3xl font-bold text-gray-800">{insights.reliableStarters || 0}</p>
+                  </div>
+                  <Shield className="w-8 h-8 text-yellow-500" />
+                </div>
               </div>
-              <DollarSign className="w-8 h-8 text-yellow-500" />
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-xl shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm">Top Scorer</p>
-                <p className="text-lg font-bold text-gray-800">{insights.topScorer?.name || 'N/A'}</p>
-                <p className="text-sm text-gray-500">{insights.topScorer?.points || 0} pts</p>
-              </div>
-              <Award className="w-8 h-8 text-purple-500" />
-            </div>
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="bg-white p-6 rounded-xl shadow-lg mb-8">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Filter className="w-5 h-5" />
-            Filters
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Position</label>
-              <select
-                value={selectedPosition}
-                onChange={(e) => setSelectedPosition(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              >
-                <option value="All">All Positions</option>
-                <option value="Goalkeeper">Goalkeeper</option>
-                <option value="Defender">Defender</option>
-                <option value="Midfielder">Midfielder</option>
-                <option value="Forward">Forward</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Max Price: £{maxPrice}m
-              </label>
-              <input
-                type="range"
-                min="4"
-                max="15"
-                step="0.5"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(parseFloat(e.target.value))}
-                className="w-full"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Min Points: {minPoints}
-              </label>
-              <input
-                type="range"
-                min="0"
-                max="300"
-                step="10"
-                value={minPoints}
-                onChange={(e) => setMinPoints(parseInt(e.target.value))}
-                className="w-full"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Search Player</label>
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Player or team name..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                />
+              
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-500 text-sm">Low Injury Risk</p>
+                    <p className="text-3xl font-bold text-gray-800">{insights.lowInjuryRisk || 0}</p>
+                  </div>
+                  <CheckCircle className="w-8 h-8 text-purple-500" />
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Price vs Points Scatter */}
-          <div className="bg-white p-6 rounded-xl shadow-lg">
-            <h3 className="text-xl font-semibold mb-4">Price vs Total Points</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <ScatterChart data={priceVsPointsData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="price" name="Price (£m)" />
-                <YAxis dataKey="points" name="Points" />
-                <Tooltip 
-                  formatter={(value, name) => [value, name === 'price' ? 'Price (£m)' : 'Points']}
-                  labelFormatter={(label) => {
-                    const player = priceVsPointsData.find(d => d.price === label);
-                    return player ? player.name : '';
-                  }}
-                />
-                <Scatter dataKey="points" fill="#8884d8" />
-              </ScatterChart>
-            </ResponsiveContainer>
+            {/* Quick Optimal Squad Preview */}
+            {optimalSquad && optimalSquad.success && (
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-yellow-500" />
+                  Recommended Squad ({optimalSquad.formation})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {Object.entries(optimalSquad.squad).map(([position, players]) => {
+                    if (position === 'all_players') return null;
+                    return (
+                      <div key={position} className="border rounded-lg p-4">
+                        <h4 className="font-semibold text-gray-800 mb-2">{position}s</h4>
+                        {players.map((player, idx) => (
+                          <div key={idx} className="text-sm text-gray-600 mb-1">
+                            {player.name} (£{player.price}m)
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-4 flex justify-between items-center">
+                  <div className="text-sm text-gray-600">
+                    Total Cost: £{optimalSquad.total_cost?.toFixed(1)}m | 
+                    Remaining: £{optimalSquad.remaining_budget?.toFixed(1)}m
+                  </div>
+                  <div className="text-sm font-semibold text-green-600">
+                    Predicted Points: {optimalSquad.predicted_total_points?.toFixed(0)}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
+        )}
 
-          {/* Top Players by Points */}
-          <div className="bg-white p-6 rounded-xl shadow-lg">
-            <h3 className="text-xl font-semibold mb-4">Top 15 Players by Points</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topPlayersByPoints} layout="horizontal">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="name" type="category" width={80} />
-                <Tooltip />
-                <Bar dataKey="points" fill="#82ca9d" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+        {/* 3-Year Analysis Tab */}
+        {activeTab === 'analysis' && (
+          <div className="space-y-8">
+            {/* Filters */}
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Filter className="w-5 h-5" />
+                Analysis Filters
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Position</label>
+                  <select
+                    value={selectedPosition}
+                    onChange={(e) => setSelectedPosition(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  >
+                    <option value="All">All Positions</option>
+                    <option value="Goalkeeper">Goalkeeper</option>
+                    <option value="Defender">Defender</option>
+                    <option value="Midfielder">Midfielder</option>
+                    <option value="Forward">Forward</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Max Price: £{maxPrice}m
+                  </label>
+                  <input
+                    type="range"
+                    min="4"
+                    max="15"
+                    step="0.5"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(parseFloat(e.target.value))}
+                    className="w-full"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Min Consistency: {minConsistency}%
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="5"
+                    value={minConsistency}
+                    onChange={(e) => setMinConsistency(parseInt(e.target.value))}
+                    className="w-full"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Search Player</label>
+                  <div className="relative">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Player name..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          {/* Best Value Players */}
-          <div className="bg-white p-6 rounded-xl shadow-lg">
-            <h3 className="text-xl font-semibold mb-4">Best Value Players (Points per £m)</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={valuePlayersData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="pointsPerMillion" fill="#ffc658" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+            {/* 3-Year Performance Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Consistency vs Performance Scatter */}
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <h3 className="text-xl font-semibold mb-4">Consistency vs Performance (3-Year)</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <ScatterChart data={filteredPlayers.slice(0, 50)}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="three_year_metrics.consistency_score" 
+                      name="Consistency Score"
+                      domain={[0, 100]}
+                    />
+                    <YAxis 
+                      dataKey="three_year_metrics.avg_points_per_season" 
+                      name="Avg Points/Season"
+                    />
+                    <Tooltip 
+                      formatter={(value, name) => [
+                        typeof value === 'number' ? value.toFixed(1) : value, 
+                        name === 'three_year_metrics.consistency_score' ? 'Consistency' : 'Avg Points'
+                      ]}
+                      labelFormatter={(label, payload) => {
+                        if (payload && payload[0]) {
+                          return payload[0].payload.name;
+                        }
+                        return '';
+                      }}
+                    />
+                    <Scatter 
+                      dataKey="three_year_metrics.avg_points_per_season" 
+                      fill="#8884d8"
+                    />
+                  </ScatterChart>
+                </ResponsiveContainer>
+              </div>
 
-          {/* Position Distribution */}
-          <div className="bg-white p-6 rounded-xl shadow-lg">
-            <h3 className="text-xl font-semibold mb-4">Players by Position</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={positionData}
-                  dataKey="count"
-                  nameKey="position"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  label={(entry) => `${entry.position}: ${entry.count}`}
-                >
-                  {positionData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+              {/* Top Consistent Performers */}
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <h3 className="text-xl font-semibold mb-4">Most Consistent Players (3-Year)</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart 
+                    data={filteredPlayers
+                      .sort((a, b) => (b.three_year_metrics?.consistency_score || 0) - (a.three_year_metrics?.consistency_score || 0))
+                      .slice(0, 10)
+                      .map(p => ({
+                        name: p.name.length > 12 ? p.name.substring(0, 12) + '...' : p.name,
+                        consistency: p.three_year_metrics?.consistency_score || 0,
+                        avgPoints: p.three_year_metrics?.avg_points_per_season || 0
+                      }))
+                    }
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="consistency" fill="#82ca9d" name="Consistency Score" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
 
-        {/* Player Table */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="p-6 border-b">
-            <h3 className="text-xl font-semibold">
-              Player Details ({filteredPlayers.length} players)
-              {filteredPlayers.length !== players.length && (
-                <span className="text-sm text-gray-500 ml-2">
-                  (filtered from {players.length} total)
-                </span>
-              )}
-            </h3>
+              {/* Value Trend Analysis */}
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <h3 className="text-xl font-semibold mb-4">Price Value Trends</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart 
+                    data={filteredPlayers
+                      .filter(p => p.three_year_metrics?.value_trend !== undefined)
+                      .sort((a, b) => (b.three_year_metrics?.value_trend || 0) - (a.three_year_metrics?.value_trend || 0))
+                      .slice(0, 15)
+                      .map(p => ({
+                        name: p.name.length > 10 ? p.name.substring(0, 10) + '...' : p.name,
+                        valueTrend: p.three_year_metrics?.value_trend || 0,
+                        currentPrice: p.price
+                      }))
+                    }
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
+                    <YAxis />
+                    <Tooltip formatter={(value) => [`£${value.toFixed(2)}m`, 'Value Trend']} />
+                    <Bar dataKey="valueTrend" fill="#ffc658" name="3-Year Value Trend" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Injury Risk Analysis */}
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <h3 className="text-xl font-semibold mb-4">Injury Risk Assessment</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart 
+                    data={filteredPlayers
+                      .sort((a, b) => (a.three_year_metrics?.injury_risk || 0) - (b.three_year_metrics?.injury_risk || 0))
+                      .slice(0, 15)
+                      .map(p => ({
+                        name: p.name.length > 10 ? p.name.substring(0, 10) + '...' : p.name,
+                        injuryRisk: p.three_year_metrics?.injury_risk || 0,
+                        avgGames: p.three_year_metrics?.avg_games_per_season || 0
+                      }))
+                    }
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
+                    <YAxis />
+                    <Tooltip formatter={(value, name) => [
+                      name === 'injuryRisk' ? `${value} weeks/season` : `${value.toFixed(1)} games`,
+                      name === 'injuryRisk' ? 'Injury Risk' : 'Avg Games'
+                    ]} />
+                    <Bar dataKey="injuryRisk" fill="#ff7300" name="Injury Risk (weeks/season)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Player</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Points</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PPG</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PP£M</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Form</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Own%</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredPlayers.slice(0, 50).map((player) => (
-                  <tr key={player.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-gray-900">{player.name || 'Unknown'}</div>
-                      {player.fullName && (
-                        <div className="text-sm text-gray-500">{player.fullName}</div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.team || 'Unknown'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        player.position === 'Forward' ? 'bg-red-100 text-red-800' :
-                        player.position === 'Midfielder' ? 'bg-blue-100 text-blue-800' :
-                        player.position === 'Defender' ? 'bg-green-100 text-green-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {player.position || 'Unknown'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">£{(player.price || 0).toFixed(1)}m</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{player.totalPoints || 0}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{(player.ppg || 0).toFixed(1)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{(player.pointsPerMillion || 0).toFixed(1)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{(player.form || 0).toFixed(1)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{(player.ownership || 0).toFixed(1)}%</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        )}
+
+        {/* Squad Builder Tab */}
+        {activeTab === 'squad-builder' && (
+          <div className="space-y-8">
+            {/* Squad Builder Controls */}
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Squad Builder Settings
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Budget: £{budget}m
+                  </label>
+                  <input
+                    type="range"
+                    min="80"
+                    max="120"
+                    step="5"
+                    value={budget}
+                    onChange={(e) => setBudget(parseFloat(e.target.value))}
+                    className="w-full"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Formation</label>
+                  <select
+                    value={formation}
+                    onChange={(e) => setFormation(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  >
+                    <option value="3-4-3">3-4-3 (Attacking)</option>
+                    <option value="3-5-2">3-5-2 (Balanced)</option>
+                    <option value="4-3-3">4-3-3 (Classic)</option>
+                    <option value="4-4-2">4-4-2 (Traditional)</option>
+                    <option value="5-3-2">5-3-2 (Defensive)</option>
+                    <option value="5-4-1">5-4-1 (Ultra Defensive)</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={prioritizeConsistency}
+                      onChange={(e) => setPrioritizeConsistency(e.target.checked)}
+                      className="rounded"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Prioritize Consistency</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Optimal Squad Display */}
+            {optimalSquad && optimalSquad.success && (
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-yellow-500" />
+                    Optimal Squad - {optimalSquad.formation}
+                  </h3>
+                  <div className="flex items-center gap-4 text-sm">
+                    <div className="bg-green-50 text-green-600 px-3 py-1 rounded-full">
+                      Cost: £{optimalSquad.total_cost?.toFixed(1)}m
+                    </div>
+                    <div className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full">
+                      Predicted: {optimalSquad.predicted_total_points?.toFixed(0)} pts
+                    </div>
+                    <div className="bg-purple-50 text-purple-600 px-3 py-1 rounded-full">
+                      Consistency: {optimalSquad.squad_consistency_score?.toFixed(1)}%
+                    </div>
+                  </div>
+                </div>
+
+                {/* Formation Visual */}
+                <div className="bg-green-100 p-8 rounded-lg mb-6">
+                  <div className="text-center text-sm text-gray-600 mb-4">Pitch Formation View</div>
+                  <div className="space-y-6">
+                    {/* Forwards */}
+                    {optimalSquad.squad.Forward?.length > 0 && (
+                      <div className="flex justify-center gap-4">
+                        {optimalSquad.squad.Forward.map((player, idx) => (
+                          <div key={idx} className="bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-medium min-w-20 text-center">
+                            {player.name}
+                            <div className="text-xs">£{player.price}m</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Midfielders */}
+                    {optimalSquad.squad.Midfielder?.length > 0 && (
+                      <div className="flex justify-center gap-4">
+                        {optimalSquad.squad.Midfielder.map((player, idx) => (
+                          <div key={idx} className="bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-medium min-w-20 text-center">
+                            {player.name}
+                            <div className="text-xs">£{player.price}m</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Defenders */}
+                    {optimalSquad.squad.Defender?.length > 0 && (
+                      <div className="flex justify-center gap-4">
+                        {optimalSquad.squad.Defender.map((player, idx) => (
+                          <div key={idx} className="bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium min-w-20 text-center">
+                            {player.name}
+                            <div className="text-xs">£{player.price}m</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Goalkeepers */}
+                    {optimalSquad.squad.Goalkeeper?.length > 0 && (
+                      <div className="flex justify-center gap-4">
+                        {optimalSquad.squad.Goalkeeper.map((player, idx) => (
+                          <div key={idx} className="bg-yellow-500 text-white px-3 py-2 rounded-lg text-sm font-medium min-w-20 text-center">
+                            {player.name}
+                            <div className="text-xs">£{player.price}m</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Squad Statistics */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-800 mb-2">Squad Summary</h4>
+                    <div className="space-y-1 text-sm">
+                      <div>Total Players: {optimalSquad.squad.all_players?.length || 0}</div>
+                      <div>Remaining Budget: £{optimalSquad.remaining_budget?.toFixed(1)}m</div>
+                      <div>Avg Player Cost: £{(optimalSquad.total_cost / (optimalSquad.squad.all_players?.length || 1)).toFixed(1)}m</div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-800 mb-2">Performance Metrics</h4>
+                    <div className="space-y-1 text-sm">
+                      <div>Predicted Total Points: {optimalSquad.predicted_total_points?.toFixed(0)}</div>
+                      <div>Avg Points per Player: {(optimalSquad.predicted_total_points / (optimalSquad.squad.all_players?.length || 1)).toFixed(1)}</div>
+                      <div>Squad Consistency: {optimalSquad.squad_consistency_score?.toFixed(1)}%</div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-800 mb-2">Risk Assessment</h4>
+                    <div className="space-y-1 text-sm">
+                      <div>Reliable Starters: {optimalSquad.squad.all_players?.filter(p => p.three_year_metrics?.reliable_starter).length || 0}</div>
+                      <div>Low Injury Risk: {optimalSquad.squad.all_players?.filter(p => (p.three_year_metrics?.injury_risk || 0) < 2).length || 0}</div>
+                      <div>High Consistency: {optimalSquad.squad.all_players?.filter(p => (p.three_year_metrics?.consistency_score || 0) > 70).length || 0}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
+        )}
+
+        {/* Player Comparison Tab */}
+        {activeTab === 'player-compare' && (
+          <div className="space-y-8">
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+              <h3 className="text-xl font-semibold mb-4">Detailed Player Analysis</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Player</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Position</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">3Y Avg Pts</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Consistency</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Injury Risk</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Value Trend</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reliable</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredPlayers.slice(0, 50).map((player) => (
+                      <tr key={player.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <div className="font-medium text-gray-900">{player.name}</div>
+                          <div className="text-sm text-gray-500">{player.team}</div>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                            player.position === 'Forward' ? 'bg-red-100 text-red-800' :
+                            player.position === 'Midfielder' ? 'bg-blue-100 text-blue-800' :
+                            player.position === 'Defender' ? 'bg-green-100 text-green-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {player.position}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">£{player.price}m</td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm">{player.three_year_metrics?.avg_points_per_season?.toFixed(1) || 'N/A'}</td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-1 bg-gray-200 rounded-full h-2 mr-2">
+                              <div 
+                                className="bg-green-500 h-2 rounded-full" 
+                                style={{ width: `${Math.min(100, player.three_year_metrics?.consistency_score || 0)}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-sm">{player.three_year_metrics?.consistency_score?.toFixed(0) || 0}%</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                            (player.three_year_metrics?.injury_risk || 0) < 1 ? 'bg-green-100 text-green-800' :
+                            (player.three_year_metrics?.injury_risk || 0) < 3 ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {player.three_year_metrics?.injury_risk?.toFixed(1) || 0} wks
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                            (player.three_year_metrics?.value_trend || 0) > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {(player.three_year_metrics?.value_trend || 0) >= 0 ? '+' : ''}£{player.three_year_metrics?.value_trend?.toFixed(2) || 0}m
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          {player.three_year_metrics?.reliable_starter ? (
+                            <CheckCircle className="w-5 h-5 text-green-500" />
+                          ) : (
+                            <AlertCircle className="w-5 h-5 text-red-500" />
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="text-center mt-8 text-gray-500 text-sm">
-          <p>Data sourced from Fantasy Premier League Official API • Real-time Analysis</p>
-          <p className="mt-2">
-            Frontend: React + Recharts • Backend: Python Serverless Functions • Deployed on Vercel
-          </p>
-          <p className="mt-1">
-            <strong>Real Data Only:</strong> No sample data used • Live FPL player analysis
-          </p>
+          <p>3-Year FPL Analysis • Squad Optimization Algorithm • Real Player Data</p>
+          <p className="mt-1">Built with React, Python, and Fantasy Premier League API</p>
         </div>
       </div>
     </div>
