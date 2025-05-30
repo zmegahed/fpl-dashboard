@@ -1,18 +1,13 @@
 {
   "functions": {
-    "api/*.py": {
-      "runtime": "python3.9"
-    }
-  },
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    }
-  ],
-  "build": {
-    "env": {
-      "PYTHONPATH": "/var/task"
+    "api/index.py": {
+      "runtime": "@vercel/python"
+    },
+    "api/players.py": {
+      "runtime": "@vercel/python"
+    },
+    "api/stats.py": {
+      "runtime": "@vercel/python"
     }
   }
 }
