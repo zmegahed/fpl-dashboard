@@ -140,13 +140,18 @@ const CompleteFPLDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-700 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-20">
-            <RefreshCw className="w-16 h-16 mx-auto mb-4 animate-spin text-green-600" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Loading 3-Year FPL Analysis</h2>
-            <p className="text-gray-600 mb-2">
-              Fetching real historical data from 2022-25 seasons...
+            <div className="relative">
+              <div className="w-24 h-24 mx-auto mb-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-4xl">⚽</div>
+              </div>
+            </div>
+            <h2 className="text-3xl font-bold text-white mb-4">Loading Premier League Data</h2>
+            <p className="text-green-100 text-lg">
+              Analyzing 3 seasons of fantasy football performance...
             </p>
           </div>
         </div>
@@ -156,17 +161,17 @@ const CompleteFPLDashboard = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-red-900 via-red-800 to-red-700 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-20">
-            <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-600" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Failed to Load Historical Data</h2>
-            <p className="text-gray-600 mb-4 max-w-2xl mx-auto">{error}</p>
+            <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-200" />
+            <h2 className="text-3xl font-bold text-white mb-4">Failed to Load Premier League Data</h2>
+            <p className="text-red-100 mb-6 max-w-2xl mx-auto text-lg">{error}</p>
             <button
               onClick={fetchAllData}
-              className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"
+              className="bg-white text-red-800 px-8 py-3 rounded-xl hover:bg-red-50 transition-all transform hover:scale-105 font-bold text-lg"
             >
-              Try Again
+              🔄 Try Again
             </button>
           </div>
         </div>
@@ -175,629 +180,772 @@ const CompleteFPLDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-800 mb-2">
-                ⚽ FPL 3-Year Analysis & Squad Builder
-              </h1>
-              <p className="text-gray-600">
-                Complete Fantasy Premier League analysis with real 3-year historical data (2022-25)
-              </p>
-              <div className="flex items-center gap-4 mt-2">
-                <div className="flex items-center text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                  <Database className="w-4 h-4 mr-1" />
-                  Real 3-Year Data
-                </div>
-                <div className="flex items-center text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                  <Trophy className="w-4 h-4 mr-1" />
-                  Squad Builder
-                </div>
-                <div className="flex items-center text-sm text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
-                  <User className="w-4 h-4 mr-1" />
-                  Player Search
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={fetchAllData}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh Data
-            </button>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-700">
+      {/* Football Pitch Pattern Background */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="w-full h-full" style={{
+          backgroundImage: `
+            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
+            linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px'
+        }}></div>
+      </div>
 
-          {/* Data Quality Notice */}
-          <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
-            <div className="flex">
-              <Info className="h-5 w-5 text-blue-400 mt-0.5 mr-2" />
-              <div>
-                <h3 className="text-sm font-medium text-blue-800">Real Historical Data</h3>
-                <p className="text-sm text-blue-700 mt-1">
-                  Analysis includes genuine 3-year FPL data: Current season (live API) + Historical seasons (GitHub repository).
-                  {insights.dataQuality}% of players have complete 3-year performance data.
+      <div className="relative z-10 p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header with Football Theme */}
+          <div className="mb-8">
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 mb-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="text-6xl">⚽</div>
+                    <div>
+                      <h1 className="text-5xl font-bold text-white mb-2">
+                        Premier League Fantasy
+                      </h1>
+                      <h2 className="text-2xl font-semibold text-green-200">
+                        3-Year Performance Analytics
+                      </h2>
+                    </div>
+                  </div>
+                  <p className="text-green-100 text-lg max-w-2xl">
+                    Complete statistical analysis spanning three Premier League seasons with real player performance data
+                  </p>
+                  
+                  {/* Premier League Style Badges */}
+                  <div className="flex flex-wrap items-center gap-3 mt-4">
+                    <div className="flex items-center bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-bold">
+                      <Trophy className="w-4 h-4 mr-2" />
+                      PREMIER LEAGUE
+                    </div>
+                    <div className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold">
+                      <Database className="w-4 h-4 mr-2" />
+                      3 SEASONS
+                    </div>
+                    <div className="flex items-center bg-red-600 text-white px-4 py-2 rounded-full text-sm font-bold">
+                      <Star className="w-4 h-4 mr-2" />
+                      REAL DATA
+                    </div>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={fetchAllData}
+                  className="bg-white text-green-800 px-6 py-3 rounded-xl hover:bg-green-50 transition-all transform hover:scale-105 font-bold shadow-lg"
+                >
+                  <RefreshCw className="w-5 h-5 inline mr-2" />
+                  Refresh
+                </button>
+              </div>
+
+              {/* Stadium Info Bar */}
+              <div className="bg-green-800/50 border border-green-600/30 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Info className="h-5 w-5 text-green-200" />
+                  <h3 className="text-green-200 font-bold">Match Analysis Report</h3>
+                </div>
+                <p className="text-green-100 text-sm">
+                  Official Fantasy Premier League statistics combined with historical performance tracking. 
+                  {insights.dataQuality}% of players feature complete 3-season datasets for maximum accuracy.
                 </p>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Navigation Tabs */}
-        <div className="mb-8">
-          <div className="flex space-x-1 bg-white p-1 rounded-lg shadow-lg">
-            {[
-              { id: 'overview', name: 'Overview', icon: BarChart3 },
-              { id: 'squad-builder', name: 'Squad Builder', icon: Trophy },
-              { id: 'player-search', name: 'Player Search', icon: User },
-              { id: 'analysis', name: '3-Year Analysis', icon: TrendingUp }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  activeTab === tab.id 
-                    ? 'bg-green-600 text-white' 
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <tab.icon className="w-4 h-4" />
-                {tab.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Overview Tab */}
-        {activeTab === 'overview' && (
-          <div className="space-y-8">
-            {/* Key Metrics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white p-6 rounded-xl shadow-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-500 text-sm">Players Analyzed</p>
-                    <p className="text-3xl font-bold text-gray-800">{insights.totalAnalyzed || 0}</p>
-                    <p className="text-xs text-green-600 mt-1">3-year historical data</p>
-                  </div>
-                  <Users className="w-8 h-8 text-blue-500" />
-                </div>
-              </div>
-              
-              <div className="bg-white p-6 rounded-xl shadow-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-500 text-sm">Complete Data</p>
-                    <p className="text-3xl font-bold text-gray-800">{insights.full3YearData || 0}</p>
-                    <p className="text-xs text-green-600 mt-1">Full 3 seasons</p>
-                  </div>
-                  <Database className="w-8 h-8 text-green-500" />
-                </div>
-              </div>
-              
-              <div className="bg-white p-6 rounded-xl shadow-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-500 text-sm">Avg Consistency</p>
-                    <p className="text-3xl font-bold text-gray-800">{insights.avgConsistency || '0'}%</p>
-                    <p className="text-xs text-green-600 mt-1">Performance reliability</p>
-                  </div>
-                  <Shield className="w-8 h-8 text-yellow-500" />
-                </div>
-              </div>
-              
-              <div className="bg-white p-6 rounded-xl shadow-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-500 text-sm">Reliable Starters</p>
-                    <p className="text-3xl font-bold text-gray-800">{insights.reliableStarters || 0}</p>
-                    <p className="text-xs text-green-600 mt-1">Consistent game time</p>
-                  </div>
-                  <CheckCircle className="w-8 h-8 text-purple-500" />
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Top Performers by 3-Year Points */}
-              <div className="bg-white p-6 rounded-xl shadow-lg">
-                <h3 className="text-xl font-semibold mb-4">Top Performers (3-Year Total Points)</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={filteredPlayers.slice(0, 10).map(p => ({
-                    name: p.name.length > 12 ? p.name.substring(0, 12) + '...' : p.name,
-                    points: p.three_year_metrics?.total_3year_points || 0,
-                    seasons: p.seasons_found
-                  }))}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                    <YAxis />
-                    <Tooltip formatter={(value, name) => [value, '3-Year Total Points']} />
-                    <Bar dataKey="points" fill="#82ca9d" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              {/* Most Consistent Players */}
-              <div className="bg-white p-6 rounded-xl shadow-lg">
-                <h3 className="text-xl font-semibold mb-4">Most Consistent Players</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={filteredPlayers
-                    .filter(p => p.seasons_found >= 2)
-                    .sort((a, b) => (b.three_year_metrics?.consistency_score || 0) - (a.three_year_metrics?.consistency_score || 0))
-                    .slice(0, 10)
-                    .map(p => ({
-                      name: p.name.length > 12 ? p.name.substring(0, 12) + '...' : p.name,
-                      consistency: p.three_year_metrics?.consistency_score || 0,
-                      seasons: p.seasons_found
-                    }))}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                    <YAxis />
-                    <Tooltip formatter={(value, name) => [`${value}%`, 'Consistency Score']} />
-                    <Bar dataKey="consistency" fill="#ffc658" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Squad Builder Tab */}
-        {activeTab === 'squad-builder' && (
-          <div className="space-y-8">
-            {/* Squad Builder Controls */}
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Settings className="w-5 h-5" />
-                Squad Builder Settings
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Budget: £{budget}m
-                  </label>
-                  <input
-                    type="range"
-                    min="80"
-                    max="120"
-                    step="5"
-                    value={budget}
-                    onChange={(e) => setBudget(parseFloat(e.target.value))}
-                    className="w-full"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Formation</label>
-                  <select
-                    value={formation}
-                    onChange={(e) => setFormation(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+          {/* Football-Style Navigation */}
+          <div className="mb-8">
+            <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-2 shadow-2xl border border-white/30">
+              <div className="flex space-x-2">
+                {[
+                  { id: 'overview', name: 'Stadium Overview', icon: '🏟️' },
+                  { id: 'squad-builder', name: 'Team Builder', icon: '⚽' },
+                  { id: 'player-search', name: 'Player Scout', icon: '🔍' },
+                  { id: 'analysis', name: 'Match Analysis', icon: '📊' }
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-3 px-6 py-4 rounded-xl transition-all transform hover:scale-105 font-bold ${
+                      activeTab === tab.id 
+                        ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                   >
-                    <option value="3-4-3">3-4-3 (Attacking)</option>
-                    <option value="3-5-2">3-5-2 (Balanced)</option>
-                    <option value="4-3-3">4-3-3 (Classic)</option>
-                    <option value="4-4-2">4-4-2 (Traditional)</option>
-                    <option value="5-3-2">5-3-2 (Defensive)</option>
-                  </select>
-                </div>
+                    <span className="text-xl">{tab.icon}</span>
+                    {tab.name}
+                  </button>
+                ))}
               </div>
             </div>
-
-            {/* Optimal Squad Display */}
-            {optimalSquad && optimalSquad.success && (
-              <div className="bg-white p-6 rounded-xl shadow-lg">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold flex items-center gap-2">
-                    <Trophy className="w-5 h-5 text-yellow-500" />
-                    Optimal Squad - {optimalSquad.formation}
-                  </h3>
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="bg-green-50 text-green-600 px-3 py-1 rounded-full">
-                      Cost: £{optimalSquad.total_cost}m
-                    </div>
-                    <div className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full">
-                      Predicted: {optimalSquad.predicted_total_points} pts
-                    </div>
-                    <div className="bg-purple-50 text-purple-600 px-3 py-1 rounded-full">
-                      Consistency: {optimalSquad.squad_analysis?.avg_consistency}%
-                    </div>
-                  </div>
-                </div>
-
-                {/* Formation Visualization */}
-                <div className="bg-green-100 p-8 rounded-lg mb-6">
-                  <div className="text-center text-sm text-gray-600 mb-4">Formation View</div>
-                  <div className="space-y-6">
-                    {/* Forwards */}
-                    {optimalSquad.squad.Forward?.length > 0 && (
-                      <div className="flex justify-center gap-4">
-                        {optimalSquad.squad.Forward.map((player, idx) => (
-                          <div key={idx} className="bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-medium min-w-24 text-center">
-                            <div>{player.name}</div>
-                            <div className="text-xs">£{player.price}m</div>
-                            <div className="text-xs">{player.three_year_metrics?.avg_points_per_season || 0} avg</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    
-                    {/* Midfielders */}
-                    {optimalSquad.squad.Midfielder?.length > 0 && (
-                      <div className="flex justify-center gap-4">
-                        {optimalSquad.squad.Midfielder.map((player, idx) => (
-                          <div key={idx} className="bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-medium min-w-24 text-center">
-                            <div>{player.name}</div>
-                            <div className="text-xs">£{player.price}m</div>
-                            <div className="text-xs">{player.three_year_metrics?.avg_points_per_season || 0} avg</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    
-                    {/* Defenders */}
-                    {optimalSquad.squad.Defender?.length > 0 && (
-                      <div className="flex justify-center gap-4">
-                        {optimalSquad.squad.Defender.map((player, idx) => (
-                          <div key={idx} className="bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium min-w-24 text-center">
-                            <div>{player.name}</div>
-                            <div className="text-xs">£{player.price}m</div>
-                            <div className="text-xs">{player.three_year_metrics?.avg_points_per_season || 0} avg</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    
-                    {/* Goalkeepers */}
-                    {optimalSquad.squad.Goalkeeper?.length > 0 && (
-                      <div className="flex justify-center gap-4">
-                        {optimalSquad.squad.Goalkeeper.map((player, idx) => (
-                          <div key={idx} className="bg-yellow-500 text-white px-3 py-2 rounded-lg text-sm font-medium min-w-24 text-center">
-                            <div>{player.name}</div>
-                            <div className="text-xs">£{player.price}m</div>
-                            <div className="text-xs">{player.three_year_metrics?.avg_points_per_season || 0} avg</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Squad Analysis */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-gray-800 mb-2">Squad Summary</h4>
-                    <div className="space-y-1 text-sm">
-                      <div>Players: {optimalSquad.squad.all_players?.length || 0}</div>
-                      <div>Remaining: £{optimalSquad.remaining_budget}m</div>
-                      <div>Reliable Starters: {optimalSquad.squad_analysis?.reliable_starters || 0}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-gray-800 mb-2">Performance</h4>
-                    <div className="space-y-1 text-sm">
-                      <div>Predicted Points: {optimalSquad.predicted_total_points}</div>
-                      <div>Avg Consistency: {optimalSquad.squad_analysis?.avg_consistency}%</div>
-                      <div>Data Quality: Complete</div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-gray-800 mb-2">3-Year Basis</h4>
-                    <div className="space-y-1 text-sm">
-                      <div>Historical Performance: Real</div>
-                      <div>Consistency Analysis: Yes</div>
-                      <div>Reliability Assessment: Yes</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
-        )}
 
-        {/* Player Search Tab */}
-        {activeTab === 'player-search' && (
-          <div className="space-y-8">
-            {/* Search Interface */}
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Search className="w-5 h-5" />
-                Player 3-Year History Search
-              </h3>
-              <div className="relative">
-                <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search for any player (e.g., Salah, Haaland, Kane)..."
-                  value={playerSearchTerm}
-                  onChange={(e) => setPlayerSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg"
-                />
-              </div>
-            </div>
-
-            {/* Search Results */}
-            {playerSearchResults.length > 0 && (
-              <div className="space-y-6">
-                {playerSearchResults.map((player) => (
-                  <div key={player.id} className="bg-white p-6 rounded-xl shadow-lg">
+          {/* Overview Tab - Stadium Style */}
+          {activeTab === 'overview' && (
+            <div className="space-y-8">
+              {/* Scoreboard Style Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { title: "Total Players", value: insights.totalAnalyzed || 0, subtitle: "In Database", icon: "👤", color: "from-blue-600 to-blue-700" },
+                  { title: "Complete Records", value: insights.full3YearData || 0, subtitle: "3 Full Seasons", icon: "📋", color: "from-green-600 to-green-700" },
+                  { title: "Avg Performance", value: `${insights.avgConsistency || 0}%`, subtitle: "Consistency Rating", icon: "⭐", color: "from-yellow-500 to-yellow-600" },
+                  { title: "Regular Starters", value: insights.reliableStarters || 0, subtitle: "Reliable Players", icon: "🛡️", color: "from-purple-600 to-purple-700" }
+                ].map((metric, idx) => (
+                  <div key={idx} className={`bg-gradient-to-br ${metric.color} rounded-2xl p-6 text-white shadow-2xl transform hover:scale-105 transition-all`}>
                     <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-800">{player.full_name}</h3>
-                        <p className="text-gray-600">{player.team} • {player.position} • £{player.current_price}m</p>
-                        <p className="text-sm text-green-600">
-                          {player.seasons_found}/3 seasons of data available
-                        </p>
-                      </div>
+                      <div className="text-3xl">{metric.icon}</div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-green-600">
-                          {player.three_year_summary?.total_3year_points || 0}
-                        </div>
-                        <div className="text-sm text-gray-500">3-Year Total Points</div>
+                        <div className="text-3xl font-bold">{metric.value}</div>
+                        <div className="text-sm opacity-90">{metric.subtitle}</div>
                       </div>
                     </div>
-
-                    {/* Season-by-Season Performance */}
-                    <div className="mb-4">
-                      <h4 className="font-semibold text-gray-800 mb-3">Season-by-Season Performance</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {player.seasons_data.map((season) => (
-                          <div key={season.season} className="border rounded-lg p-4">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="font-semibold text-gray-800">{season.season}</span>
-                              <span className="text-lg font-bold text-green-600">{season.total_points} pts</span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
-                              <div>Games: {season.games_played}</div>
-                              <div>PPG: {season.ppg}</div>
-                              <div>Goals: {season.goals}</div>
-                              <div>Assists: {season.assists}</div>
-                              {season.clean_sheets > 0 && (
-                                <>
-                                  <div>Clean Sheets: {season.clean_sheets}</div>
-                                  <div>Minutes: {season.minutes}</div>
-                                </>
-                              )}
-                              <div>Start: £{season.price_start}m</div>
-                              <div>End: £{season.price_end}m</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* 3-Year Summary Stats */}
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h4 className="font-semibold text-gray-800 mb-3">3-Year Summary</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <span className="text-gray-600">Avg Per Season:</span>
-                          <span className="font-semibold ml-2">{player.three_year_summary?.avg_points_per_season || 0} pts</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-600">Consistency:</span>
-                          <span className="font-semibold ml-2">{player.three_year_summary?.consistency_score || 0}%</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-600">Best Season:</span>
-                          <span className="font-semibold ml-2">{player.three_year_summary?.best_season || 0} pts</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-600">Reliable Starter:</span>
-                          <span className="font-semibold ml-2">
-                            {player.three_year_summary?.reliable_starter ? 'Yes' : 'No'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                    <div className="text-lg font-semibold opacity-95">{metric.title}</div>
                   </div>
                 ))}
               </div>
-            )}
 
-            {playerSearchTerm && playerSearchResults.length === 0 && (
-              <div className="text-center py-12 text-gray-500">
-                <User className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                <p>No players found matching "{playerSearchTerm}"</p>
-                <p className="text-sm">Try searching for first name, last name, or team</p>
+              {/* Football Pitch Style Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Top Scorers Chart */}
+                <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl border border-white/30">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="text-2xl">🥅</div>
+                    <h3 className="text-2xl font-bold text-gray-800">Top Goal Scorers</h3>
+                    <div className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-bold">
+                      3-Year Total Points
+                    </div>
+                  </div>
+                  <ResponsiveContainer width="100%" height={320}>
+                    <BarChart data={filteredPlayers.slice(0, 8).map(p => ({
+                      name: p.name.length > 12 ? p.name.substring(0, 12) + '...' : p.name,
+                      points: p.three_year_metrics?.total_3year_points || 0,
+                      team: p.team
+                    }))}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                      <XAxis 
+                        dataKey="name" 
+                        angle={-45} 
+                        textAnchor="end" 
+                        height={80}
+                        tick={{ fontSize: 12, fill: '#374151' }}
+                      />
+                      <YAxis tick={{ fontSize: 12, fill: '#374151' }} />
+                      <Tooltip 
+                        formatter={(value, name) => [value, '3-Year Points']} 
+                        contentStyle={{
+                          backgroundColor: '#1f2937',
+                          border: 'none',
+                          borderRadius: '12px',
+                          color: 'white'
+                        }}
+                      />
+                      <Bar 
+                        dataKey="points" 
+                        fill="#10b981"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Consistency Champions */}
+                <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl border border-white/30">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="text-2xl">🏆</div>
+                    <h3 className="text-2xl font-bold text-gray-800">Consistency Champions</h3>
+                    <div className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold">
+                      Performance Rating
+                    </div>
+                  </div>
+                  <ResponsiveContainer width="100%" height={320}>
+                    <BarChart data={filteredPlayers
+                      .filter(p => p.seasons_found >= 2)
+                      .sort((a, b) => (b.three_year_metrics?.consistency_score || 0) - (a.three_year_metrics?.consistency_score || 0))
+                      .slice(0, 8)
+                      .map(p => ({
+                        name: p.name.length > 12 ? p.name.substring(0, 12) + '...' : p.name,
+                        consistency: p.three_year_metrics?.consistency_score || 0,
+                        position: p.position
+                      }))}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                      <XAxis 
+                        dataKey="name" 
+                        angle={-45} 
+                        textAnchor="end" 
+                        height={80}
+                        tick={{ fontSize: 12, fill: '#374151' }}
+                      />
+                      <YAxis 
+                        domain={[0, 100]}
+                        tick={{ fontSize: 12, fill: '#374151' }}
+                      />
+                      <Tooltip 
+                        formatter={(value, name) => [`${value}%`, 'Consistency Score']} 
+                        contentStyle={{
+                          backgroundColor: '#1f2937',
+                          border: 'none',
+                          borderRadius: '12px',
+                          color: 'white'
+                        }}
+                      />
+                      <Bar 
+                        dataKey="consistency" 
+                        fill="#f59e0b"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {!playerSearchTerm && (
-              <div className="text-center py-12 text-gray-500">
-                <Search className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                <p>Search for any player to see their 3-year performance history</p>
-                <p className="text-sm">Real data from 2022-23, 2023-24, and 2024-25 seasons</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* 3-Year Analysis Tab */}
-        {activeTab === 'analysis' && (
-          <div className="space-y-8">
-            {/* Filters */}
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Filter className="w-5 h-5" />
-                Analysis Filters
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Position</label>
-                  <select
-                    value={selectedPosition}
-                    onChange={(e) => setSelectedPosition(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                  >
-                    <option value="All">All Positions</option>
-                    <option value="Goalkeeper">Goalkeeper</option>
-                    <option value="Defender">Defender</option>
-                    <option value="Midfielder">Midfielder</option>
-                    <option value="Forward">Forward</option>
-                  </select>
+          {/* Squad Builder Tab - Football Pitch Layout */}
+          {activeTab === 'squad-builder' && (
+            <div className="space-y-8">
+              {/* Manager's Office Controls */}
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/30">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="text-3xl">👔</div>
+                  <h3 className="text-2xl font-bold text-gray-800">Manager's Tactics Board</h3>
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Max Price: £{maxPrice}m
-                  </label>
-                  <input
-                    type="range"
-                    min="4"
-                    max="15"
-                    step="0.5"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(parseFloat(e.target.value))}
-                    className="w-full"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Min Consistency: {minConsistency}%
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="5"
-                    value={minConsistency}
-                    onChange={(e) => setMinConsistency(parseInt(e.target.value))}
-                    className="w-full"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
-                  <div className="relative">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Player name..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-lg font-bold text-gray-800 mb-3">
+                        💰 Transfer Budget: £{budget}m
+                      </label>
+                      <input
+                        type="range"
+                        min="80"
+                        max="120"
+                        step="5"
+                        value={budget}
+                        onChange={(e) => setBudget(parseFloat(e.target.value))}
+                        className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                        style={{
+                          background: `linear-gradient(to right, #10b981 0%, #10b981 ${((budget-80)/40)*100}%, #e5e7eb ${((budget-80)/40)*100}%, #e5e7eb 100%)`
+                        }}
+                      />
+                      <div className="flex justify-between text-sm text-gray-600 mt-1">
+                        <span>£80m</span>
+                        <span>£120m</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-lg font-bold text-gray-800 mb-3">⚽ Formation</label>
+                      <select
+                        value={formation}
+                        onChange={(e) => setFormation(e.target.value)}
+                        className="w-full p-4 text-lg border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-500 focus:border-green-500 bg-white"
+                      >
+                        <option value="3-4-3">3-4-3 ⚔️ Ultra Attack</option>
+                        <option value="3-5-2">3-5-2 ⚖️ Balanced</option>
+                        <option value="4-3-3">4-3-3 🎯 Classic</option>
+                        <option value="4-4-2">4-4-2 🏛️ Traditional</option>
+                        <option value="5-3-2">5-3-2 🛡️ Defensive</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Comprehensive Player Table */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <div className="p-6 border-b">
-                <h3 className="text-xl font-semibold">
-                  3-Year Player Analysis ({filteredPlayers.length} players)
-                </h3>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Player</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Position</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">3Y Total</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avg/Season</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Consistency</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reliable</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trend</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Seasons</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredPlayers.slice(0, 50).map((player) => (
-                      <tr key={player.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <div className="font-medium text-gray-900">{player.name}</div>
-                          <div className="text-sm text-gray-500">{player.team}</div>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                            player.position === 'Forward' ? 'bg-red-100 text-red-800' :
-                            player.position === 'Midfielder' ? 'bg-blue-100 text-blue-800' :
-                            player.position === 'Defender' ? 'bg-green-100 text-green-800' :
-                            'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {player.position}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">£{player.price}m</td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-green-600">
-                          {player.three_year_metrics?.total_3year_points || 0}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm">
-                          {player.three_year_metrics?.avg_points_per_season || 0}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="flex-1 bg-gray-200 rounded-full h-2 mr-2">
-                              <div 
-                                className="bg-green-500 h-2 rounded-full" 
-                                style={{ width: `${Math.min(100, player.three_year_metrics?.consistency_score || 0)}%` }}
-                              ></div>
+              {/* Football Pitch Squad Display */}
+              {optimalSquad && optimalSquad.success ? (
+                <div className="bg-gradient-to-b from-green-400 to-green-600 rounded-2xl p-8 shadow-2xl border-4 border-white">
+                  <div className="text-center mb-6">
+                    <h3 className="text-3xl font-bold text-white mb-2">🏟️ Your Starting XI</h3>
+                    <div className="flex justify-center gap-6 text-white">
+                      <div className="bg-white/20 px-4 py-2 rounded-full">
+                        💰 Cost: £{optimalSquad.total_cost}m
+                      </div>
+                      <div className="bg-white/20 px-4 py-2 rounded-full">
+                        🎯 Predicted: {optimalSquad.predicted_total_points} pts
+                      </div>
+                      <div className="bg-white/20 px-4 py-2 rounded-full">
+                        ⭐ Consistency: {optimalSquad.squad_analysis?.avg_consistency}%
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pitch Layout */}
+                  <div className="relative bg-green-500 rounded-xl p-8" style={{
+                    backgroundImage: `
+                      linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px),
+                      linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px),
+                      radial-gradient(circle at center, rgba(255,255,255,0.1) 2px, transparent 2px)
+                    `,
+                    backgroundSize: '30px 30px, 30px 30px, 60px 60px'
+                  }}>
+                    {/* Center Circle */}
+                    <div className="absolute top-1/2 left-1/2 w-24 h-24 border-2 border-white/50 rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
+                    
+                    <div className="space-y-12">
+                      {/* Forwards */}
+                      {optimalSquad.squad.Forward?.length > 0 && (
+                        <div className="flex justify-center gap-8">
+                          {optimalSquad.squad.Forward.map((player, idx) => (
+                            <div key={idx} className="bg-red-600 text-white px-4 py-3 rounded-xl font-bold text-center min-w-24 shadow-lg border-2 border-white">
+                              <div className="text-sm">{player.name}</div>
+                              <div className="text-xs">£{player.price}m</div>
+                              <div className="text-xs">⭐ {player.three_year_metrics?.avg_points_per_season || 0} avg</div>
                             </div>
-                            <span className="text-sm">{player.three_year_metrics?.consistency_score?.toFixed(0) || 0}%</span>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* Midfielders */}
+                      {optimalSquad.squad.Midfielder?.length > 0 && (
+                        <div className="flex justify-center gap-6">
+                          {optimalSquad.squad.Midfielder.map((player, idx) => (
+                            <div key={idx} className="bg-blue-600 text-white px-3 py-2 rounded-xl font-bold text-center min-w-20 shadow-lg border-2 border-white">
+                              <div className="text-xs">{player.name}</div>
+                              <div className="text-xs">£{player.price}m</div>
+                              <div className="text-xs">{player.three_year_metrics?.avg_points_per_season || 0} avg</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* Defenders */}
+                      {optimalSquad.squad.Defender?.length > 0 && (
+                        <div className="flex justify-center gap-8">
+                          {optimalSquad.squad.Defender.map((player, idx) => (
+                            <div key={idx} className="bg-green-700 text-white px-3 py-2 rounded-xl font-bold text-center min-w-20 shadow-lg border-2 border-white">
+                              <div className="text-xs">{player.name}</div>
+                              <div className="text-xs">£{player.price}m</div>
+                              <div className="text-xs">{player.three_year_metrics?.avg_points_per_season || 0} avg</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* Goalkeepers */}
+                      {optimalSquad.squad.Goalkeeper?.length > 0 && (
+                        <div className="flex justify-center">
+                          {optimalSquad.squad.Goalkeeper.map((player, idx) => (
+                            <div key={idx} className="bg-yellow-500 text-black px-4 py-3 rounded-xl font-bold text-center min-w-24 shadow-lg border-2 border-white">
+                              <div className="text-sm">{player.name}</div>
+                              <div className="text-xs">£{player.price}m</div>
+                              <div className="text-xs">🧤 {player.three_year_metrics?.avg_points_per_season || 0} avg</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Squad Analysis */}
+                  <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white/20 rounded-xl p-4">
+                      <h4 className="text-white font-bold mb-2 text-center">📊 Squad Summary</h4>
+                      <div className="space-y-1 text-sm text-white text-center">
+                        <div>Players: {optimalSquad.squad.all_players?.length || 0}</div>
+                        <div>Remaining: £{optimalSquad.remaining_budget}m</div>
+                        <div>Reliable Starters: {optimalSquad.squad_analysis?.reliable_starters || 0}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white/20 rounded-xl p-4">
+                      <h4 className="text-white font-bold mb-2 text-center">🎯 Performance</h4>
+                      <div className="space-y-1 text-sm text-white text-center">
+                        <div>Predicted Points: {optimalSquad.predicted_total_points}</div>
+                        <div>Avg Consistency: {optimalSquad.squad_analysis?.avg_consistency}%</div>
+                        <div>Data Quality: Complete</div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white/20 rounded-xl p-4">
+                      <h4 className="text-white font-bold mb-2 text-center">📈 3-Year Basis</h4>
+                      <div className="space-y-1 text-sm text-white text-center">
+                        <div>Historical Performance: Real</div>
+                        <div>Consistency Analysis: Yes</div>
+                        <div>Reliability Assessment: Yes</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-gradient-to-b from-green-400 to-green-600 rounded-2xl p-8 shadow-2xl border-4 border-white">
+                  <div className="text-center text-white">
+                    <div className="text-6xl mb-4">⚽</div>
+                    <h3 className="text-2xl font-bold mb-4">Building Your Optimal Squad...</h3>
+                    <p className="text-green-100">Analyzing player performance data to create the perfect team within your budget</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Player Search Tab - Scouting Theme */}
+          {activeTab === 'player-search' && (
+            <div className="space-y-8">
+              {/* Scout's Notebook */}
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/30">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="text-3xl">🔍</div>
+                  <h3 className="text-2xl font-bold text-gray-800">Scout's Player Database</h3>
+                </div>
+                
+                <div className="relative">
+                  <Search className="w-6 h-6 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search any Premier League player... (e.g., Salah, Haaland, Bruno)"
+                    value={playerSearchTerm}
+                    onChange={(e) => setPlayerSearchTerm(e.target.value)}
+                    className="w-full pl-14 pr-6 py-4 text-lg border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-500 focus:border-green-500 bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* Search Results */}
+              {playerSearchResults.length > 0 && (
+                <div className="space-y-6">
+                  {playerSearchResults.map((player) => (
+                    <div key={player.id} className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/30">
+                      {/* Player Header */}
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                            {player.name.substring(0, 2)}
                           </div>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          {player.three_year_metrics?.reliable_starter ? (
-                            <CheckCircle className="w-5 h-5 text-green-500" />
-                          ) : (
-                            <AlertCircle className="w-5 h-5 text-red-500" />
-                          )}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                            player.three_year_metrics?.performance_trend === 'improving' ? 'bg-green-100 text-green-800' :
-                            player.three_year_metrics?.performance_trend === 'declining' ? 'bg-red-100 text-red-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {player.three_year_metrics?.performance_trend || 'unknown'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm">
-                          <span className={`px-2 py-1 text-xs rounded-full ${
-                            player.seasons_found === 3 ? 'bg-green-100 text-green-800' :
-                            player.seasons_found === 2 ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {player.seasons_found}/3
-                          </span>
-                        </td>
+                          <div>
+                            <h3 className="text-2xl font-bold text-gray-800">{player.full_name}</h3>
+                            <p className="text-lg text-gray-600">{player.team} • {player.position} • £{player.current_price}m</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold">
+                                {player.seasons_found}/3 seasons analyzed
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-4xl font-bold text-green-600">
+                            {player.three_year_summary?.total_3year_points || 0}
+                          </div>
+                          <div className="text-gray-500 font-medium">Total Points (3 years)</div>
+                        </div>
+                      </div>
+
+                      {/* Performance Timeline */}
+                      <div className="mb-6">
+                        <h4 className="text-xl font-bold text-gray-800 mb-4">🏆 Season Performance Timeline</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {player.seasons_data.map((season) => (
+                            <div key={season.season} className="border-2 border-gray-200 rounded-xl p-4 bg-gradient-to-br from-gray-50 to-gray-100">
+                              <div className="flex items-center justify-between mb-3">
+                                <span className="font-bold text-gray-800">{season.season}</span>
+                                <span className="text-2xl font-bold text-green-600">{season.total_points}</span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                                <div>⚽ Goals: {season.goals}</div>
+                                <div>🎯 Assists: {season.assists}</div>
+                                <div>🎮 Games: {season.games_played}</div>
+                                <div>💫 PPG: {season.ppg}</div>
+                                {season.clean_sheets > 0 && (
+                                  <>
+                                    <div>🛡️ Clean Sheets: {season.clean_sheets}</div>
+                                    <div>⏱️ Minutes: {season.minutes}</div>
+                                  </>
+                                )}
+                                <div>💰 Start: £{season.price_start}m</div>
+                                <div>💰 End: £{season.price_end}m</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Player Stats Dashboard */}
+                      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6">
+                        <h4 className="text-xl font-bold text-gray-800 mb-4">📊 Complete Statistical Analysis</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                          <div className="text-center">
+                            <div className="text-3xl mb-2">⭐</div>
+                            <div className="text-2xl font-bold text-green-600">
+                              {player.three_year_summary?.avg_points_per_season || 0}
+                            </div>
+                            <div className="text-sm text-gray-600 font-medium">Avg Points/Season</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-3xl mb-2">🛡️</div>
+                            <div className="text-2xl font-bold text-blue-600">
+                              {player.three_year_summary?.consistency_score || 0}%
+                            </div>
+                            <div className="text-sm text-gray-600 font-medium">Consistency Score</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-3xl mb-2">🏆</div>
+                            <div className="text-2xl font-bold text-yellow-600">
+                              {player.three_year_summary?.best_season || 0}
+                            </div>
+                            <div className="text-sm text-gray-600 font-medium">Best Season</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-3xl mb-2">
+                              {player.three_year_summary?.reliable_starter ? '✅' : '⚠️'}
+                            </div>
+                            <div className="text-lg font-bold text-gray-800">
+                              {player.three_year_summary?.reliable_starter ? 'Reliable' : 'Rotation'}
+                            </div>
+                            <div className="text-sm text-gray-600 font-medium">Starter Status</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {playerSearchTerm && playerSearchResults.length === 0 && (
+                <div className="text-center py-16">
+                  <div className="text-8xl mb-4">🔍</div>
+                  <h3 className="text-3xl font-bold text-white mb-4">No Players Found</h3>
+                  <p className="text-green-100 text-lg">No players found matching "{playerSearchTerm}"</p>
+                  <p className="text-green-200 text-sm">Try searching for first name, last name, or team</p>
+                </div>
+              )}
+
+              {!playerSearchTerm && (
+                <div className="text-center py-16">
+                  <div className="text-8xl mb-4">🔍</div>
+                  <h3 className="text-3xl font-bold text-white mb-4">Scout Any Premier League Player</h3>
+                  <p className="text-green-100 text-lg max-w-2xl mx-auto">
+                    Search our comprehensive database featuring 3 years of real performance data from every Premier League player
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Analysis Tab - Match Analysis Style */}
+          {activeTab === 'analysis' && (
+            <div className="space-y-8">
+              {/* Analysis Controls */}
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/30">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="text-3xl">📊</div>
+                  <h3 className="text-2xl font-bold text-gray-800">Advanced Match Analysis</h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div>
+                    <label className="block text-lg font-bold text-gray-800 mb-3">⚽ Position</label>
+                    <select
+                      value={selectedPosition}
+                      onChange={(e) => setSelectedPosition(e.target.value)}
+                      className="w-full p-3 text-lg border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-500 bg-white"
+                    >
+                      <option value="All">🌟 All Positions</option>
+                      <option value="Goalkeeper">🧤 Goalkeeper</option>
+                      <option value="Defender">🛡️ Defender</option>
+                      <option value="Midfielder">⚡ Midfielder</option>
+                      <option value="Forward">🎯 Forward</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-lg font-bold text-gray-800 mb-3">
+                      💰 Max Price: £{maxPrice}m
+                    </label>
+                    <input
+                      type="range"
+                      min="4"
+                      max="15"
+                      step="0.5"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(parseFloat(e.target.value))}
+                      className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-lg font-bold text-gray-800 mb-3">
+                      ⭐ Min Consistency: {minConsistency}%
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="5"
+                      value={minConsistency}
+                      onChange={(e) => setMinConsistency(parseInt(e.target.value))}
+                      className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-lg font-bold text-gray-800 mb-3">🔍 Search</label>
+                    <div className="relative">
+                      <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Player name..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-12 p-3 text-lg border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Premier League Style Player Table */}
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-white/30">
+                <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6 text-white">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="text-3xl">🏆</div>
+                      <h3 className="text-2xl font-bold">Premier League Performance Analysis</h3>
+                    </div>
+                    <div className="bg-white/20 px-4 py-2 rounded-full">
+                      {filteredPlayers.length} Players Analyzed
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-sm font-bold text-gray-800 uppercase">Player</th>
+                        <th className="px-6 py-4 text-left text-sm font-bold text-gray-800 uppercase">Position</th>
+                        <th className="px-6 py-4 text-left text-sm font-bold text-gray-800 uppercase">Value</th>
+                        <th className="px-6 py-4 text-left text-sm font-bold text-gray-800 uppercase">3Y Total</th>
+                        <th className="px-6 py-4 text-left text-sm font-bold text-gray-800 uppercase">Season Avg</th>
+                        <th className="px-6 py-4 text-left text-sm font-bold text-gray-800 uppercase">Consistency</th>
+                        <th className="px-6 py-4 text-left text-sm font-bold text-gray-800 uppercase">Status</th>
+                        <th className="px-6 py-4 text-left text-sm font-bold text-gray-800 uppercase">Form</th>
+                        <th className="px-6 py-4 text-left text-sm font-bold text-gray-800 uppercase">Data</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredPlayers.slice(0, 50).map((player, idx) => (
+                        <tr key={player.id} className={`hover:bg-green-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                                {player.name.substring(0, 2)}
+                              </div>
+                              <div>
+                                <div className="font-bold text-gray-900">{player.name}</div>
+                                <div className="text-sm text-gray-500">{player.team}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-3 py-1 text-sm font-bold rounded-full ${
+                              player.position === 'Forward' ? 'bg-red-100 text-red-800' :
+                              player.position === 'Midfielder' ? 'bg-blue-100 text-blue-800' :
+                              player.position === 'Defender' ? 'bg-green-100 text-green-800' :
+                              'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {player.position === 'Forward' ? '🎯' : 
+                               player.position === 'Midfielder' ? '⚡' :
+                               player.position === 'Defender' ? '🛡️' : '🧤'} {player.position}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-lg font-bold text-green-600">£{player.price}m</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-xl font-bold text-purple-600">
+                              {player.three_year_metrics?.total_3year_points || 0}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-lg font-semibold">
+                              {player.three_year_metrics?.avg_points_per_season || 0}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 bg-gray-200 rounded-full h-3">
+                                <div 
+                                  className="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full transition-all" 
+                                  style={{ width: `${Math.min(100, player.three_year_metrics?.consistency_score || 0)}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-sm font-bold">{player.three_year_metrics?.consistency_score?.toFixed(0) || 0}%</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {player.three_year_metrics?.reliable_starter ? (
+                              <div className="flex items-center gap-1 text-green-600">
+                                <CheckCircle className="w-5 h-5" />
+                                <span className="font-semibold">Starter</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1 text-orange-600">
+                                <AlertCircle className="w-5 h-5" />
+                                <span className="font-semibold">Rotation</span>
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-3 py-1 text-sm font-bold rounded-full ${
+                              player.three_year_metrics?.performance_trend === 'improving' ? 'bg-green-100 text-green-800' :
+                              player.three_year_metrics?.performance_trend === 'declining' ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {player.three_year_metrics?.performance_trend === 'improving' ? '📈 Rising' :
+                               player.three_year_metrics?.performance_trend === 'declining' ? '📉 Falling' : '➡️ Stable'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-3 py-1 text-sm font-bold rounded-full ${
+                              player.seasons_found === 3 ? 'bg-green-100 text-green-800' :
+                              player.seasons_found === 2 ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {player.seasons_found}/3 seasons
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Footer */}
-        <div className="text-center mt-8 text-gray-500 text-sm">
-          <p className="font-semibold">🏆 Complete FPL 3-Year Analysis with Real Historical Data</p>
-          <p className="mt-1">
-            Data Sources: 
-            <a href="https://github.com/vaastav/Fantasy-Premier-League" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">
-              GitHub Historical Data
-            </a> • 
-            <a href="https://fantasy.premierleague.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">
-              FPL Official API
-            </a>
-          </p>
-          <div className="mt-3 p-3 bg-gray-100 rounded-lg max-w-3xl mx-auto">
-            <p className="text-xs text-gray-600">
-              <strong>Complete FPL Solution:</strong> Real 3-year historical analysis, optimal squad builder based on historical performance, 
-              and comprehensive player search with season-by-season stats. All data is genuine - no simulations.
-            </p>
+          {/* Footer - Premier League Style */}
+          <div className="text-center mt-12 pb-8">
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8">
+              <div className="text-4xl mb-4">⚽🏆📊</div>
+              <h3 className="text-2xl font-bold text-white mb-3">Official Premier League Fantasy Analysis</h3>
+              <p className="text-green-100 text-lg mb-4 max-w-3xl mx-auto">
+                Complete statistical analysis powered by real Premier League data spanning three full seasons
+              </p>
+              
+              <div className="flex flex-wrap justify-center gap-4 mb-6">
+                <a href="https://github.com/vaastav/Fantasy-Premier-League" target="_blank" rel="noopener noreferrer" 
+                   className="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 transition-all transform hover:scale-105 font-bold flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4" />
+                  Historical Data Source
+                </a>
+                <a href="https://fantasy.premierleague.com/" target="_blank" rel="noopener noreferrer"
+                   className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-all transform hover:scale-105 font-bold flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4" />
+                  Official FPL Site
+                </a>
+              </div>
+              
+              <div className="bg-green-800/30 border border-green-600/30 rounded-xl p-4 max-w-4xl mx-auto">
+                <p className="text-green-100 text-sm leading-relaxed">
+                  <strong className="text-white">🏟️ Complete Fantasy Football Solution:</strong> Real 3-year Premier League analysis, 
+                  intelligent squad optimization based on historical performance patterns, and comprehensive player scouting 
+                  with detailed season-by-season statistics. All data sourced directly from official records - no simulations or estimates.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
