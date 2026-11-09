@@ -1,0 +1,1 @@
+Original Python endpoints are retained here for reference, outside the active API directory. They are not used by Touchline and must not be deployed as current-data endpoints: the original code hard-codes 2022–25 season labels, a 2024 update time and incomplete squad rules. The replacement live feed is server/data.js, with normalization in src/data/model.js.
